@@ -1,0 +1,908 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Based Chatbot</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eef4ff, #dbeafe);
+            color: #1e293b;
+        }
+
+        /* Header */
+        header {
+            height: 70px;
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #bfdbfe;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 14px;
+        }
+
+        .online {
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+
+        #themeBtn {
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Main */
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            height: fit-content;
+        }
+
+        .bot-profile {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .bot-icon {
+            width: 75px;
+            height: 75px;
+            margin: auto;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 38px;
+        }
+
+        .bot-profile h2 {
+            margin-top: 12px;
+            font-size: 20px;
+        }
+
+        .bot-profile p {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .quick-title {
+            margin: 20px 0 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .quick-btn {
+            width: 100%;
+            padding: 11px;
+            margin-bottom: 9px;
+            border: 1px solid #dbeafe;
+            background: #eff6ff;
+            color: #2563eb;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #dbeafe;
+            transform: translateX(3px);
+        }
+
+        .clear-btn {
+            width: 100%;
+            padding: 11px;
+            margin-top: 10px;
+            border: none;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .clear-btn:hover {
+            background: #fecaca;
+        }
+
+        /* Chat area */
+        .chat-card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 680px;
+        }
+
+        .chat-header {
+            background: #f8fafc;
+            padding: 18px 22px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chat-header h2 {
+            font-size: 19px;
+        }
+
+        .chat-header p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        /* Messages */
+        .messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 18px;
+            animation: appear 0.3s ease;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .bot-avatar {
+            background: #2563eb;
+            color: white;
+        }
+
+        .user-avatar {
+            background: #7c3aed;
+            color: white;
+            margin-left: 10px;
+            margin-right: 0;
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .bot .bubble {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-top-left-radius: 4px;
+        }
+
+        .user .bubble {
+            background: #2563eb;
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .time {
+            display: block;
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        /* Typing */
+        .typing {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typing 1s infinite;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Input */
+        .input-area {
+            padding: 17px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        #messageInput:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        #sendBtn {
+            width: 55px;
+            border: none;
+            border-radius: 12px;
+            background: #2563eb;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #sendBtn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Dark mode */
+        body.dark {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        body.dark .sidebar,
+        body.dark .chat-card,
+        body.dark .input-area {
+            background: #1e293b;
+        }
+
+        body.dark .chat-header,
+        body.dark .messages {
+            background: #111827;
+        }
+
+        body.dark .bot-profile,
+        body.dark .chat-header,
+        body.dark .input-area {
+            border-color: #334155;
+        }
+
+        body.dark .bot-profile p,
+        body.dark .chat-header p,
+        body.dark footer {
+            color: #94a3b8;
+        }
+
+        body.dark .bot .bubble {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark #messageInput {
+            background: #0f172a;
+            color: white;
+            border-color: #475569;
+        }
+
+        body.dark .quick-btn {
+            background: #172554;
+            border-color: #1e40af;
+        }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .chat-card {
+                height: calc(100vh - 110px);
+            }
+
+            .bubble {
+                max-width: 82%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">☁️ Cloud<span>Bot</span></div>
+
+    <div class="header-right">
+        <div class="status">
+            <span class="online"></span>
+            Cloud Online
+        </div>
+
+        <button id="themeBtn" onclick="toggleTheme()">🌙</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="bot-profile">
+            <div class="bot-icon">🤖</div>
+            <h2>Cloud Assistant</h2>
+            <p>AI-powered virtual assistant</p>
+        </div>
+
+        <div class="quick-title">Quick Questions</div>
+
+        <button class="quick-btn" onclick="quickMessage('What is cloud computing?')">
+            ☁️ What is cloud computing?
+        </button>
+
+        <button class="quick-btn" onclick="quickMessage('What can you do?')">
+            🤖 What can you do?
+        </button>
+
+        <button class="quick-btn" onclick="quickMessage('Tell me about cloud storage')">
+            💾 Cloud storage
+        </button>
+
+        <button class="quick-btn" onclick="quickMessage('What is AWS?')">
+            🌐 What is AWS?
+        </button>
+
+        <button class="quick-btn" onclick="quickMessage('Give me a project idea')">
+            💡 Project idea
+        </button>
+
+        <button class="clear-btn" onclick="clearChat()">
+            🗑️ Clear Chat
+        </button>
+
+    </aside>
+
+    <!-- Chat -->
+    <main class="chat-card">
+
+        <div class="chat-header">
+            <h2>💬 Chat with CloudBot</h2>
+            <p>Ask me anything about cloud computing and technology.</p>
+        </div>
+
+        <div class="messages" id="messages">
+
+            <div class="message bot">
+                <div class="avatar bot-avatar">🤖</div>
+
+                <div class="bubble">
+                    Hello! 👋 I'm CloudBot.<br><br>
+                    I can answer questions about cloud computing, technology, projects, and more.
+                    <span class="time">Now</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="typing" id="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="input-area">
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Type your message..."
+                autocomplete="off"
+            >
+
+            <button id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+
+    </main>
+
+</div>
+
+<footer>
+    © 2026 CloudBot | Cloud-Based Chatbot Mini Project
+</footer>
+
+
+<script>
+
+    const input = document.getElementById("messageInput");
+    const messages = document.getElementById("messages");
+    const typing = document.getElementById("typing");
+
+    /* Send message using Enter */
+    input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+
+    /* Get current time */
+    function getTime() {
+
+        const now = new Date();
+
+        return now.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+
+    /* Add message */
+    function addMessage(text, sender) {
+
+        const message = document.createElement("div");
+
+        message.className = "message " + sender;
+
+        if (sender === "bot") {
+
+            message.innerHTML = `
+                <div class="avatar bot-avatar">🤖</div>
+
+                <div class="bubble">
+                    ${text}
+                    <span class="time">${getTime()}</span>
+                </div>
+            `;
+
+        } else {
+
+            message.innerHTML = `
+                <div class="bubble">
+                    ${text}
+                    <span class="time">${getTime()}</span>
+                </div>
+
+                <div class="avatar user-avatar">👤</div>
+            `;
+        }
+
+        messages.appendChild(message);
+
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+
+    /* Send message */
+    function sendMessage() {
+
+        const text = input.value.trim();
+
+        if (text === "") {
+            return;
+        }
+
+        addMessage(escapeHTML(text), "user");
+
+        input.value = "";
+
+        showTyping();
+
+        setTimeout(function() {
+
+            hideTyping();
+
+            const reply = getBotReply(text);
+
+            addMessage(reply, "bot");
+
+            saveChat();
+
+        }, 800);
+
+    }
+
+
+    /* Quick message */
+    function quickMessage(text) {
+
+        input.value = text;
+
+        sendMessage();
+
+    }
+
+
+    /* Typing animation */
+    function showTyping() {
+        typing.style.display = "flex";
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function hideTyping() {
+        typing.style.display = "none";
+    }
+
+
+    /* Bot response system */
+    function getBotReply(message) {
+
+        const msg = message.toLowerCase();
+
+
+        if (
+            msg.includes("hello") ||
+            msg.includes("hi") ||
+            msg.includes("hey")
+        ) {
+
+            return "Hello! 👋 Nice to meet you. How can I help you today?";
+
+        }
+
+
+        if (
+            msg.includes("who are you") ||
+            msg.includes("what are you")
+        ) {
+
+            return "I'm CloudBot 🤖, a cloud-based virtual assistant created as a mini-project. I can answer basic questions about cloud computing and technology.";
+
+        }
+
+
+        if (
+            msg.includes("what can you do") ||
+            msg.includes("help")
+        ) {
+
+            return `
+                I can help you with:
+                <br><br>
+                ☁️ Cloud computing<br>
+                💾 Cloud storage<br>
+                🌐 AWS, Azure and Google Cloud<br>
+                💡 Mini-project ideas<br>
+                🤖 Chatbot concepts<br>
+                💻 Basic technology questions
+            `;
+
+        }
+
+
+        if (
+            msg.includes("cloud computing") ||
+            msg.includes("what is cloud")
+        ) {
+
+            return `
+                <b>Cloud computing</b> means using computing resources such as servers, storage, databases and software over the Internet instead of depending only on your local computer.
+                <br><br>
+                Examples include AWS, Microsoft Azure and Google Cloud.
+            `;
+
+        }
+
+
+        if (
+            msg.includes("cloud storage") ||
+            msg.includes("storage")
+        ) {
+
+            return `
+                <b>Cloud storage</b> allows users to store files and data on remote servers that can be accessed through the Internet.
+                <br><br>
+                Examples: Google Drive, OneDrive and Amazon S3.
+            `;
+
+        }
+
+
+        if (
+            msg.includes("aws") ||
+            msg.includes("amazon web services")
+        ) {
+
+            return `
+                <b>AWS</b> stands for Amazon Web Services. It provides cloud services such as computing, storage, databases, networking and machine learning.
+            `;
+
+        }
+
+
+        if (
+            msg.includes("azure")
+        ) {
+
+            return `
+                <b>Microsoft Azure</b> is Microsoft's cloud computing platform. It provides services for hosting applications, databases, storage, AI and networking.
+            `;
+
+        }
+
+
+        if (
+            msg.includes("google cloud") ||
+            msg.includes("gcp")
+        ) {
+
+            return `
+                <b>Google Cloud Platform (GCP)</b> provides cloud infrastructure, storage, databases, AI, machine learning and application hosting services.
+            `;
+
+        }
+
+
+        if (
+            msg.includes("chatbot")
+        ) {
+
+            return `
+                A <b>chatbot</b> is a software application that communicates with users through text or voice.
+                <br><br>
+                Chatbots can be used for customer support, education, shopping, healthcare and many other applications.
+            `;
+
+        }
+
+
+        if (
+            msg.includes("project") ||
+            msg.includes("idea")
+        ) {
+
+            return `
+                Here are some cloud computing mini-project ideas:
+                <br><br>
+                1. ☁️ Cloud-Based Chatbot<br>
+                2. 🏥 Cloud-Based Disease Prediction System<br>
+                3. 🚌 Cloud-Based Bus Reservation System<br>
+                4. 🏨 Cloud-Based Hotel Booking System<br>
+                5. 🍔 Cloud-Based Food Ordering System<br>
+                6. 📁 Cloud-Based File Storage System
+            `;
+
+        }
+
+
+        if (
+            msg.includes("thank")
+        ) {
+
+            return "You're welcome! 😊 I'm happy to help.";
+
+        }
+
+
+        if (
+            msg.includes("bye")
+        ) {
+
+            return "Goodbye! 👋 Have a great day!";
+
+        }
+
+
+        return `
+            I understand your question. 🤖
+            <br><br>
+            I'm currently a demo cloud chatbot, so my built-in knowledge is limited.
+            <br><br>
+            Try asking me about <b>cloud computing, AWS, Azure, cloud storage, chatbots, or project ideas</b>.
+        `;
+
+    }
+
+
+    /* Prevent HTML injection */
+    function escapeHTML(text) {
+
+        const div = document.createElement("div");
+
+        div.textContent = text;
+
+        return div.innerHTML;
+
+    }
+
+
+    /* Clear chat */
+    function clearChat() {
+
+        messages.innerHTML = `
+            <div class="message bot">
+
+                <div class="avatar bot-avatar">🤖</div>
+
+                <div class="bubble">
+                    Chat cleared successfully! 🗑️<br><br>
+                    How can I help you?
+                    <span class="time">${getTime()}</span>
+                </div>
+
+            </div>
+        `;
+
+        localStorage.removeItem("cloudBotChat");
+
+    }
+
+
+    /* Save chat */
+    function saveChat() {
+
+        localStorage.setItem(
+            "cloudBotChat",
+            messages.innerHTML
+        );
+
+    }
+
+
+    /* Load chat */
+    function loadChat() {
+
+        const savedChat = localStorage.getItem("cloudBotChat");
+
+        if (savedChat) {
+            messages.innerHTML = savedChat;
+        }
+
+    }
+
+
+    /* Dark mode */
+    function toggleTheme() {
+
+        document.body.classList.toggle("dark");
+
+        const button = document.getElementById("themeBtn");
+
+        if (document.body.classList.contains("dark")) {
+
+            button.textContent = "☀️";
+
+            localStorage.setItem("theme", "dark");
+
+        } else {
+
+            button.textContent = "🌙";
+
+            localStorage.setItem("theme", "light");
+
+        }
+
+    }
+
+
+    /* Load theme */
+    function loadTheme() {
+
+        const theme = localStorage.getItem("theme");
+
+        if (theme === "dark") {
+
+            document.body.classList.add("dark");
+
+            document.getElementById("themeBtn").textContent = "☀️";
+
+        }
+
+    }
+
+
+    loadChat();
+
+    loadTheme();
+
+</script>
+
+</body>
+</html>
+```
